@@ -1,0 +1,18 @@
+- hosts: aws,aws2
+  gather_facts: no
+  tasks: 
+    - name: Print message
+      debug:
+        msg: "My first playbook"
+    - name: Copy jar file
+      ansible.builtin.copy:
+        src: /home/jenkins/workspace/hello-world/simple-java-maven-app/target/my-app-1.0-SNAPSHOT.jar
+        dest: /home/ubuntu/tmp
+    - name: Run shell script
+      shell: |
+        pwd
+        ls
+      register: shell_output
+    - name: Show shell output
+      debug: 
+        msg: "{{ shell_output.stdout_lines }}"

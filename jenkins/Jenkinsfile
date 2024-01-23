@@ -1,0 +1,46 @@
+pipeline {
+    agent {
+        node {
+            label 'maven_agent'
+        }
+    }
+
+    stages {
+        stage('Pull') {
+            steps {
+                checkout scmGit(
+                    branches: [[name: 'master']],
+                    userRemoteConfigs: [[credentialsId: 'admin-gitlab',
+                    url: 'http://192.168.213.235:81/hello-world/simple-java-maven-app.git']])
+            }
+        }
+        stage('Build') {
+            steps {
+                withMaven(
+                    maven: 'Maven', // (1)
+                ) {
+                  sh "mvn clean package"
+                } 
+            }
+        }
+        stage('Test') { 
+            steps {
+                withMaven(
+                    maven: 'Maven', // (1)
+                ) {
+                  sh "mvn test"
+                } 
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'whoami'
+                ansiblePlaybook(
+                    credentialsId: 'aws', 
+                    inventory: 'ansible/inventory', 
+                    playbook: 'ansible/my-first-playbook.yml'
+                )
+            }
+        }
+    }
+}
